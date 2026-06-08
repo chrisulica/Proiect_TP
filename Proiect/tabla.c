@@ -10,6 +10,7 @@ void initializeaza_tabla(piesa tabla[8][8])
             {
                 tabla[i][j].tip = gol;
                 tabla[i][j].culoare = fara_culoare;
+                tabla[i][j].a_mutat =0;
             }
         }
 
@@ -17,9 +18,11 @@ void initializeaza_tabla(piesa tabla[8][8])
     {
         tabla[1][j].tip = pion;
         tabla[1][j].culoare = alb;
+        tabla[1][j].a_mutat = 0;
         
         tabla[6][j].tip = pion;
         tabla[6][j].culoare = negru;
+        tabla[6][j].a_mutat = 0;
     }
 
     tip_piesa ordine_baza[8] = {turn, cal, nebun, regina, rege, nebun, cal, turn};
@@ -28,9 +31,11 @@ void initializeaza_tabla(piesa tabla[8][8])
     {
         tabla[0][j].tip = ordine_baza[j];
         tabla[0][j].culoare = alb;
+        tabla[0][j].a_mutat =0;
         
         tabla[7][j].tip = ordine_baza[j];
         tabla[7][j].culoare = negru;
+        tabla[7][j].a_mutat = 0;
     }
 }
 
