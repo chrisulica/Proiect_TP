@@ -9,13 +9,14 @@ INSTALARE SI COMPILARE:
 
 1. CLONARE REPOSITORY
 
-
 git clone https://github.com/chrisulica/Proiect_TP/git
 
 cd Proiect_TP/Proiect
 
 3. COMPILARE
+
 make
 
 4. RULARE:
+
 ./chess
