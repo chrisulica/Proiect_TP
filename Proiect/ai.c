@@ -1,6 +1,7 @@
 #include "ai.h"
 #include "mutari.h"
 #include <stdlib.h>
+#include <limits.h>
 
 int valoare_piesa(tip_piesa tip)
 {
@@ -32,22 +33,23 @@ int evalueaza_tabla(piesa tabla[8][8]) {
     return scor;
 }
 
-int minimax(piesa tabla[8][8], int adancime, int este_max, int ep_l, int ep_c)
+int minimax(piesa tabla[8][8], int adancime, int alpha, int beta, int este_max, int ep_l, int ep_c)
 {
     if(adancime == 0) return evalueaza_tabla(tabla);
+    int prune = 0;
 
     if(este_max)
     {
         int cel_mai_bun = INT_MIN;
-        for(int sl=0; sl<8;sl++)
+        for(int sl=0; sl< 8 && !prune;sl++)
         {
-            for(int sc=0; sc<8; sc++)
+            for(int sc=0; sc<8 && !prune; sc++)
             {
                 if(tabla[sl][sc].culoare == negru)
                 {
-                    for(int dl=0; dl<8; dl++)
+                    for(int dl=0; dl<8 && !prune; dl++)
                     {
-                        for(int dc=0; dc<8; dc++)
+                        for(int dc=0; dc<8 && !prune; dc++)
                         {
                             if(este_mutare_valida(tabla, sl, sc, dl, dc, negru, ep_l, ep_c))
                             {
@@ -55,9 +57,11 @@ int minimax(piesa tabla[8][8], int adancime, int este_max, int ep_l, int ep_c)
                                 piesa dest=tabla[dl][dc];
                                 tabla[dl][dc] = tabla[sl][sc];
                                 tabla[sl][sc].tip = gol;
-                                int val=minimax(tabla, adancime -1, 0, ep_l, ep_c);
+                                int val=minimax(tabla, adancime - 1, alpha, beta, 0, ep_l, ep_c);
                                 tabla[sl][sc] = orig; tabla[dl][dc] = dest;
                                 if (val > cel_mai_bun) cel_mai_bun = val;
+                                if (cel_mai_bun > alpha) alpha = cel_mai_bun;
+                                if (beta <= alpha) prune = 1; 
                             }
                         }
                     }
@@ -67,15 +71,15 @@ int minimax(piesa tabla[8][8], int adancime, int este_max, int ep_l, int ep_c)
         return cel_mai_bun;
     } else {
         int cel_mai_bun = INT_MAX;
-        for(int sl=0; sl<8; sl++)
+        for(int sl=0; sl<8 && !prune; sl++)
         {
-            for(int sc=0; sc<8; sc++)
+            for(int sc=0; sc<8 && !prune; sc++)
             {
                 if(tabla[sl][sc].culoare == alb)
                 {
-                    for(int dl=0; dl<8; dl++)
+                    for(int dl=0; dl<8 && !prune; dl++)
                     {
-                        for(int dc=0; dc<8; dc++)
+                        for(int dc=0; dc<8 && !prune; dc++)
                         {
                             if (este_mutare_valida(tabla, sl, sc, dl, dc, alb, ep_l, ep_c))
                             {
@@ -83,9 +87,11 @@ int minimax(piesa tabla[8][8], int adancime, int este_max, int ep_l, int ep_c)
                                 piesa dest = tabla[dl][dc];
                                 tabla[dl][dc] = tabla[sl][sc]; 
                                 tabla[sl][sc].tip = gol;
-                                int val = minimax(tabla, adancime - 1, 1, ep_l, ep_c);
+                                int val = minimax(tabla, adancime - 1, alpha, beta, 1, ep_l, ep_c);
                                 tabla[sl][sc] = orig; tabla[dl][dc] = dest;
                                 if (val < cel_mai_bun) cel_mai_bun = val;
+                                if (cel_mai_bun < beta) beta = cel_mai_bun;
+                                if (beta <= alpha) prune = 1; 
                             }
                         }
                     }
@@ -99,6 +105,8 @@ int minimax(piesa tabla[8][8], int adancime, int este_max, int ep_l, int ep_c)
 void mutare_ai(piesa tabla[8][8], culoare_piesa culoare_ai, int *ep_l, int*ep_c, int *sl_out, int *sc_out, int *dl_out, int *dc_out)
 {
     int scor_bun = INT_MIN;
+    int alpha = INT_MIN;
+    int beta=INT_MAX;
 
     for (int sl = 0; sl < 8; sl++) 
     {
@@ -117,7 +125,7 @@ void mutare_ai(piesa tabla[8][8], culoare_piesa culoare_ai, int *ep_l, int*ep_c,
                             tabla[dl][dc] = tabla[sl][sc]; 
                             tabla[sl][sc].tip = gol;
                             
-                            int scor = minimax(tabla, 2, 0, *ep_l, *ep_c);
+                            int scor = minimax(tabla, 3, alpha, beta, 0, *ep_l, *ep_c);
                             
                             tabla[sl][sc] = orig; tabla[dl][dc] = dest;
                             
@@ -128,6 +136,7 @@ void mutare_ai(piesa tabla[8][8], culoare_piesa culoare_ai, int *ep_l, int*ep_c,
                                 *dl_out = dl; 
                                 *dc_out = dc;
                             }
+                            if(scor_bun>alpha) alpha = scor_bun;
                         }
                     }
                 }

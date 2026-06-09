@@ -75,6 +75,9 @@ void porneste_joc(piesa tabla[8][8])
     culoare_piesa randul_curent =alb;
     int ep_l = -1, ep_c =-1;
 
+    int asteapta_promovare = 0;
+    int prom_l = -1, prom_c = -1;
+
     char istoric_mutari[500][20];
     int nr_mutari=0;
 
@@ -134,7 +137,18 @@ void porneste_joc(piesa tabla[8][8])
                 {
                     int ai_sl, ai_sc, ai_dl, ai_dc;
                     mutare_ai(tabla, negru, &ep_l, &ep_c, &ai_sl, &ai_sc, &ai_dl, &ai_dc);
-                    sprintf(istoric_mutari[nr_mutari], "%d. %c%d - %c%d", (nr_mutari/2)+1, ai_sc + 'a', ai_sl + 1, ai_dc + 'a', ai_dl + 1);
+
+                    piesa piesa_mutata = tabla[ai_sl][ai_sc];
+                    tabla[ai_dl][ai_dc] = piesa_mutata;
+                    tabla[ai_sl][ai_sc].tip = gol;
+                    tabla[ai_sl][ai_sc].culoare = fara_culoare;
+                    tabla[ai_dl][ai_dc].a_mutat = 1;
+
+                    if(tabla[ai_dl][ai_dc].tip == pion && ai_dl == 0) {
+                        tabla[ai_dl][ai_dc].tip = regina;
+                    }
+
+                    sprintf(istoric_mutari[nr_mutari], "%d. %c%d - %c%d", nr_mutari + 1, ai_sc + 'a', ai_sl + 1, ai_dc + 'a', ai_dl + 1);
                     nr_mutari++;
 
                     randul_curent = alb;
@@ -142,12 +156,39 @@ void porneste_joc(piesa tabla[8][8])
                         if(!are_mutari_valide(tabla, randul_curent, ep_l, ep_c)) joc_activ = 0;
                     } else {
                         if(!are_mutari_valide(tabla, randul_curent, ep_l, ep_c)) joc_activ = 0;
-                    }   
+                    }
+                    if(este_lipsa_material(tabla)) joc_activ = 0;   
                 }
             } 
             if(joc_activ)
             {
-                if(!(mod_ai==1 && randul_curent == negru))
+                if(asteapta_promovare)
+                {
+                    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                    {
+                        int mx = GetMouseX();
+                        int my = GetMouseY();
+                        int menu_x = 240, menu_y = 340, btn_size = 100;
+                        
+                        if(my >= menu_y && my <= menu_y + btn_size && mx >= menu_x && mx <= menu_x + 4 * btn_size)
+                        {
+                            if(mx < menu_x + btn_size) tabla[prom_l][prom_c].tip = regina;
+                            else if(mx < menu_x + 2 * btn_size) tabla[prom_l][prom_c].tip = turn;
+                            else if(mx < menu_x + 3 * btn_size) tabla[prom_l][prom_c].tip = nebun;
+                            else tabla[prom_l][prom_c].tip = cal;
+                            
+                            asteapta_promovare = 0;
+                            randul_curent = (randul_curent == alb) ? negru : alb;
+                            
+                            if(este_in_sah(tabla, randul_curent)) {
+                                if(!are_mutari_valide(tabla, randul_curent, ep_l, ep_c)) joc_activ = 0;
+                            } else {
+                                if(!are_mutari_valide(tabla, randul_curent, ep_l, ep_c)) joc_activ = 0;
+                            }
+                        }
+                    }
+                }
+                else if(!(mod_ai==1 && randul_curent == negru))
                 {
                     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                     {
@@ -188,7 +229,7 @@ void porneste_joc(piesa tabla[8][8])
                                     tabla[sel_l][sel_c] = piesa_mutata;
                                     tabla[lin_stop][col_stop] = temp_dest;
                                 } else {
-                                    sprintf(istoric_mutari[nr_mutari], "%d. %c%d - %c%d", (nr_mutari/2)+1, sel_c + 'a', sel_l+1, col_stop +'a', lin_stop +1);
+                                    sprintf(istoric_mutari[nr_mutari], "%d. %c%d - %c%d", nr_mutari + 1, sel_c + 'a', sel_l + 1, col_stop + 'a', lin_stop + 1);
                                     nr_mutari++;
                                     
                                     if(piesa_mutata.tip == pion && sel_c != col_stop && temp_dest.tip == gol)
@@ -223,27 +264,23 @@ void porneste_joc(piesa tabla[8][8])
                                         ep_c= -1;
                                     }
 
-                                    if(tabla[lin_stop][col_stop].tip == pion)
+                                    if(tabla[lin_stop][col_stop].tip == pion && (lin_stop == 7 || lin_stop == 0))
                                     {
-                                        if( (randul_curent == alb && lin_stop==7) || (randul_curent== negru && lin_stop == 0))
-                                        {
-                                            tabla[lin_stop][col_stop].tip = regina;
-                                        }
+                                        asteapta_promovare = 1;
+                                        prom_l = lin_stop;
+                                        prom_c = col_stop;
                                     }
-
-                                    randul_curent = (randul_curent == alb) ? negru : alb;
-
-                                    if(este_in_sah(tabla, randul_curent))
+                                    else
                                     {
-                                        if(!are_mutari_valide(tabla, randul_curent, ep_l, ep_c))
+                                        randul_curent = (randul_curent == alb) ? negru : alb;
+
+                                        if(este_in_sah(tabla, randul_curent))
                                         {
-                                            joc_activ=0;
+                                            if(!are_mutari_valide(tabla, randul_curent, ep_l, ep_c)) joc_activ=0;
+                                        } else {
+                                            if(!are_mutari_valide(tabla, randul_curent, ep_l, ep_c)) joc_activ =0;
                                         }
-                                    } else {
-                                        if(!are_mutari_valide(tabla, randul_curent, ep_l, ep_c))
-                                        {
-                                            joc_activ =0;
-                                        }
+                                        if(este_lipsa_material(tabla)) joc_activ = 0;
                                     }
                                     }
                                 }
@@ -278,24 +315,7 @@ void porneste_joc(piesa tabla[8][8])
                 DrawText(cifra, margin +800 + 12,offsety_cifra, 20, BLACK);
             }
 
-            if(este_in_sah(tabla,randul_curent))
-            {
-                int l_rege =-1, c_rege =-1;
-                for(int i =0; i<8; i++)
-                {
-                    for(int j=0; j<8; j++)
-                    {
-                        if(tabla[i][j].tip == rege && tabla[i][j].culoare == randul_curent)
-                        {
-                            l_rege = i;
-                            c_rege = j;
-                            break;
-                        }
-                    }
-                    if(l_rege != -1) break;
-                }
-                DrawRectangle(c_rege * latura + margin, (7 - l_rege) * latura + margin, latura, latura, (Color){255, 0, 0, 150});
-            }//in sah
+            
 
             for(int i=0; i<8; i++)
             {
@@ -351,11 +371,30 @@ void porneste_joc(piesa tabla[8][8])
                 DrawText(istoric_mutari[i], 905, 210 + ((i - start_log) *30), 20, GetColor(0x2B1A10FF));
             }
             
+            if(asteapta_promovare)
+            {
+                DrawRectangle(0, 0, 880, 880, (Color){0, 0, 0, 150}); // Fundal semi-transparent
+                
+                int menu_x = 240, menu_y = 340, btn_size = 100;
+                DrawRectangle(menu_x - 10, menu_y - 40, 4 * btn_size + 20, btn_size + 50, RAYWHITE);
+                DrawText("Alege piesa pentru promovare:", menu_x, menu_y - 30, 20, BLACK);
+                
+                Texture2D* set_tex = (tabla[prom_l][prom_c].culoare == alb) ? t_alb : t_negru;
+                
+                DrawTexturePro(set_tex[regina], (Rectangle){0, 0, set_tex[regina].width, set_tex[regina].height}, (Rectangle){menu_x, menu_y, btn_size, btn_size}, (Vector2){0,0}, 0.0f, WHITE);
+                DrawTexturePro(set_tex[turn],   (Rectangle){0, 0, set_tex[turn].width, set_tex[turn].height},   (Rectangle){menu_x + btn_size, menu_y, btn_size, btn_size}, (Vector2){0,0}, 0.0f, WHITE);
+                DrawTexturePro(set_tex[nebun],  (Rectangle){0, 0, set_tex[nebun].width, set_tex[nebun].height},  (Rectangle){menu_x + 2 * btn_size, menu_y, btn_size, btn_size}, (Vector2){0,0}, 0.0f, WHITE);
+                DrawTexturePro(set_tex[cal],    (Rectangle){0, 0, set_tex[cal].width, set_tex[cal].height},    (Rectangle){menu_x + 3 * btn_size, menu_y, btn_size, btn_size}, (Vector2){0,0}, 0.0f, WHITE);
+                
+                for(int b = 0; b < 4; b++) DrawRectangleLines(menu_x + b * btn_size, menu_y, btn_size, btn_size, DARKGRAY);
+            }
+
             if(!joc_activ)
             {
                 DrawRectangle(0, 390, 880, 100, (Color){0, 0, 0, 200});
                 DrawText("Stop joc!",340, 415, 50, RED);
             }
+
 
             if(stare_curenta == STARE_PAUZA)
             {
@@ -369,6 +408,7 @@ void porneste_joc(piesa tabla[8][8])
                     randul_curent = alb;
                     nr_mutari = 0;
                     selectat =0;
+                    asteapta_promovare = 0;
                     stare_curenta=STARE_IN_JOC;
                 }
                 if(DeseneazaButon((Rectangle){390, 520, 400, 80}, "Opreste jocul")) stare_curenta=STARE_MENIU;

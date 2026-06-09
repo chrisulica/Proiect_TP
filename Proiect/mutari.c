@@ -121,6 +121,29 @@ int este_in_sah(piesa tabla[8][8], culoare_piesa culoare_rege)
     return 0;
 }
 
+int este_lipsa_material(piesa tabla[8][8])
+{
+    int nr_cai =0;
+    int nr_nebuni=0;
+    int alte_piese=0;
+
+    for(int i=0; i<8;i++)
+    {
+        for(int j=0; j<8;j++)
+        {
+            if(tabla[i][j].tip == gol || tabla[i][j].tip == rege) continue;
+            if(tabla[i][j].tip == cal) nr_cai++;
+            else if(tabla[i][j].tip == nebun) nr_nebuni++;
+            else alte_piese++;
+        }
+    }
+    if(alte_piese>0) return 0;
+    if(nr_cai ==0 && nr_nebuni==0) return 1;
+    if(nr_cai==0 && nr_nebuni ==0) return 1;
+    if((nr_cai == 1 && nr_nebuni == 0) || (nr_cai == 0 && nr_nebuni == 1)) return 1;
+    return 0;
+}
+
 int are_mutari_valide(piesa tabla[8][8], culoare_piesa jucator, int ep_l, int ep_c)
 {
     for(int l_start =0; l_start<8; l_start++){

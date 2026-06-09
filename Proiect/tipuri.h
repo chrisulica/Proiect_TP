@@ -2,7 +2,7 @@
 #define TIPURI_H
 
 typedef enum{
-    gol,
+    gol =0,
     pion,
     cal,
     nebun,
@@ -12,7 +12,7 @@ typedef enum{
 }tip_piesa;
 
 typedef enum {
-    fara_culoare,
+    fara_culoare = 0,
     alb,
     negru
 }culoare_piesa;

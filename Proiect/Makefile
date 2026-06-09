@@ -1,22 +1,18 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -g
+CFLAGS = -Wall -std=c11
+LDFLAGS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
-RAYLIB_PATH = D:/Apps/raylib/raylib-5.0_win64_mingw-w64
-INCLUDE_DIR = -I$(RAYLIB_PATH)/include
-LIB_DIR = -L$(RAYLIB_PATH)/lib
+SRC = main.c tabla.c joc.c mutari.c ai.c
+OBJ = $(SRC:.c=.o)
+EXEC = simulator_sah
 
-LIBS = -lraylib -lopengl32 -lgdi32 -lwinmm
+all: $(EXEC)
 
-TARGET = joc_sah
-SRCS = main.c tabla.c joc.c mutari.c ai.c
-OBJS = $(SRCS:.c=.o)
-
-all: $(TARGET)
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDE_DIR) -o $(TARGET) $(OBJS) $(LIB_DIR) $(LIBS)
+$(EXEC): $(OBJ)
+	$(CC) $(OBJ) -o $(EXEC) $(LDFLAGS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(INCLUDE_DIR) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
-clean: 
-	rm -f $(OBJS) $(TARGET).exe
+clean:
+	rm -f *.o $(EXEC)
