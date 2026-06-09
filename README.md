@@ -19,4 +19,4 @@ make
 
 3. RULARE:
 
-./chess
+./simulator_sah
