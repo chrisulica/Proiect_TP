@@ -13,10 +13,10 @@ git clone https://github.com/chrisulica/Proiect_TP/git
 
 cd Proiect_TP/Proiect
 
-3. COMPILARE
+2. COMPILARE
 
 make
 
-4. RULARE:
+3. RULARE:
 
 ./chess
