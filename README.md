@@ -8,11 +8,14 @@ Pentru a rula, utilizatorul trebuie sa aiba instalat: GCC, Make, raylib.
 INSTALARE SI COMPILARE:
 
 1. CLONARE REPOSITORY
+
+
 git clone https://github.com/chrisulica/Proiect_TP/git
+
 cd Proiect_TP/Proiect
 
-2. COMPILARE
+3. COMPILARE
 make
 
-3. RULARE:
+4. RULARE:
 ./chess
